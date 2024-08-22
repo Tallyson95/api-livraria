@@ -1,5 +1,7 @@
 import express from 'express';
 import connectMongo from './config/dbConnect.js';
+import livro from './models/livro.js';
+
 const app = express();
 app.use(express.json());
 
@@ -12,45 +14,33 @@ conexao.once("open", ()=>{
     console.log("Conexão realizada com sucesso.")
 })
 
-const livros = [
- /*    {
-        id: 0,
-        nome: "Harry Potter e as relíquias da morte",
-        ano: 2007
-    },
-
-    {
-        id: 1,
-        nome: "O Senhor dos Anéis",
-        ano: 2000
-    } */
-]
-
 
 app.get('/', (req, res) => {
     res.status(200).send("Hello world.");
 });
 
-app.get('/livros', (req, res) => {
-    if (livros.length > 0) {
-        res.status(200).json(livros);
+app.get('/livros', async (req, res) => {
+    const listarLivrosMongo = await livro.find({});
+    if (listarLivrosMongo.length > 0) {
+        res.status(200).json(listarLivrosMongo);
     }
     res.status(400).send("Nenhum livro foi cadastrado.");
 
 });
 
-app.get('/livros/:id', (req, res) => {
+app.get('/livros/:id', async (req, res) => {
+    const listarLivrosMongo = await livro.find({});
     let idLivro = req.params.id;
-    if (idLivro > livros.length - 1 || livros.length <= 0 || idLivro < 0) {
+    if (idLivro > listarLivrosMongo.length - 1 || listarLivrosMongo.length <= 0 || idLivro < 0) {
         res.status(400).send("Livro não encontrado!");
     } else {
-        idLivro = livros.findIndex(livro => livro.id === Number(idLivro));
-        res.status(200).json(livros[idLivro]);
+        idLivro = listarLivrosMongo.findIndex(livro => livro.id === Number(idLivro));
+        res.status(200).json(listarLivrosMongo[idLivro]);
     }
 
 });
 
-app.post("/livros", (req, res) => {
+app.post("/livros", async (req, res) => {
     const valorId = Number(req.body.id);
     if (livros.find(livro => livro.id === valorId)) {
         res.status(400).send("livro já cadastrado!");
@@ -84,9 +74,6 @@ app.delete("/livros", (req, res) => {
     res.status(200).json(livros);
 })
 
-const buscarLivro = (idLivro) => {
-    return idLivro = livros.findIndex(livro => livro.id === Number(idLivro));
 
-}
 
 export default app;
